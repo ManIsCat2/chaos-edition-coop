@@ -618,19 +618,25 @@ local function chaos_processing(m)
                     == (u32) scuttlebug_seg6_texture_06010908) then]]
                     object =
                         spawn_sync_object(id_bhvScuttlebug, E_MODEL_SCUTTLEBUG, m.pos.x, m.pos.y, m.pos.z, nil)
-                    object.oPosX = object.oPosX + random_f32_around_zero(800)
-                    object.oPosY = object.oPosY + 800
-                    object.oPosZ = object.oPosZ + random_f32_around_zero(800)
+                    if object then
+                        object.oPosX = object.oPosX + random_f32_around_zero(800)
+                        object.oPosY = object.oPosY + 800
+                        object.oPosZ = object.oPosZ + random_f32_around_zero(800)
+                    end
                     object =
                         spawn_sync_object(id_bhvScuttlebug, E_MODEL_SCUTTLEBUG, m.pos.x, m.pos.y, m.pos.z, nil)
-                    object.oPosX = object.oPosX + random_f32_around_zero(800)
-                    object.oPosY = object.oPosY + 800
-                    object.oPosZ = object.oPosZ + random_f32_around_zero(800)
+                    if object then
+                        object.oPosX = object.oPosX + random_f32_around_zero(800)
+                        object.oPosY = object.oPosY + 800
+                        object.oPosZ = object.oPosZ + random_f32_around_zero(800)
+                    end
                     object =
                         spawn_sync_object(id_bhvScuttlebug, E_MODEL_SCUTTLEBUG, m.pos.x, m.pos.y, m.pos.z, nil)
-                    object.oPosX = object.oPosX + random_f32_around_zero(800)
-                    object.oPosY = object.oPosY + 800
-                    object.oPosZ = object.oPosZ + random_f32_around_zero(800)
+                    if object then
+                        object.oPosX = object.oPosX + random_f32_around_zero(800)
+                        object.oPosY = object.oPosY + 800
+                        object.oPosZ = object.oPosZ + random_f32_around_zero(800)
+                    end
                 end
                 -- }
             end
