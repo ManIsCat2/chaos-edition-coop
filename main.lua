@@ -1039,8 +1039,10 @@ local function chaos_processing(m)
                     end
                 elseif j == 7 then
                     -- todo (toadface)
-                    for texi = 1, #settextotoad do
-                        texture_override_set(settextotoad[texi], toadface)
+                    if (gNetworkPlayers[0].currCourseNum == COURSE_WF or gNetworkPlayers[0].currCourseNum == COURSE_BOB or gNetworkPlayers[0].currCourseNum == COURSE_THI or gNetworkPlayers[0].currCourseNum == COURSE_TTM) then
+                        for texi = 1, #settextotoad do
+                            texture_override_set(settextotoad[texi], toadface)
+                        end
                     end
                 elseif j == 12 then
                     gLakituState.keyDanceRoll = random_u16() & 0x3fff - 0x2000
@@ -1209,7 +1211,7 @@ local function chaos_processing(m)
                     m.hurtCounter = m.hurtCounter + (m.flags & MARIO_CAP_ON_HEAD) ~= 0 and 8 or 12;
                     m.squishTimer = 30
                     set_camera_shake_from_hit(SHAKE_FALL_DAMAGE)
-                    play_sound(SOUND_MARIO_ATTACKED, m.marioObj.header.gfx.cameraToObject)
+                    play_character_sound(m, CHAR_SOUND_ATTACKED)
                 end
             end
 
@@ -1783,7 +1785,7 @@ hook_event(HOOK_ON_INTERACT, function(m, o, t, s)
     end
 end)
 if network_is_server() then
-hook_chat_command("d", "Debug", debg_cmd)
-hook_chat_command("ad", "aDebug", debg_cmd2)
-hook_chat_command("set-chaotic", "Sets the chaoticness of the mod (Default = 20)", setchaoticness_cmd)
+    hook_chat_command("d", "Debug", debg_cmd)
+    hook_chat_command("ad", "aDebug", debg_cmd2)
+    hook_chat_command("set-chaotic", "Sets the chaoticness of the mod (Default = 20)", setchaoticness_cmd)
 end
