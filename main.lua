@@ -1568,116 +1568,117 @@ local function chaos_processing(m)
                 gPlayerSyncTable[0].objrandomyaw = false
             end
 
+            --[[ bobomb.inc.c
+
+            if (codeActive(1)) then
+                for_each_object_with_behavior(id_bhvBobomb,
+                    function(g) if g.oHeldState == HELD_HELD then g.oBobombFuseTimer = 153; end end)
+            end
+
+            --bubba.inc.c
+            if (codeActive(145)) then
+                for_each_object_with_behavior(id_bhvBubba,
+                    function(g)
+                        -- bhv_bubba_loop()
+                        -- bhv_bubba_loop()
+                    end)
+            end
+
+            --chainchomp.inc.c
+            if (codeActive(125)) then
+                for_each_object_with_behavior(id_bhvChainChomp,
+                    function(g) g.parentObj = m.marioObj end)
+            end
+
+            --goomba.inc.c
+
+            if (codeActive(119)) then
+                for_each_object_with_behavior(id_bhvGoomba,
+                    function(g) g.oGoombaSize = 2; end)
+            end
+
+            --spawnstar.inc.c
+            local currentLevelStarFlags = save_file_get_star_flags(get_current_save_file_num() - 1,
+                gNetworkPlayers[0].currCourseNum - 1);
+
+            for_each_object_with_behavior(id_bhvStarSpawnCoordinates,
+                function(g)
+                    starspawnedloop(g);
+
+                    if (codeActive(25)) then
+                        -- bhv_koopa_update();
+                    end
+                end)
+
+            for_each_object_with_behavior(id_bhvSpawnedStar,
+                function(g)
+                    starspawnedloop(g);
+
+                    if (codeActive(25)) then
+                        --  bhv_koopa_update();
+                    end
+                end)
+            for_each_object_with_behavior(id_bhvSpawnedStarNoLevelExit,
+                function(g)
+                    starspawnedloop(g);
+
+                    if (codeActive(25)) then
+                        --bhv_koopa_update();
+                    end
+                end)
+            for_each_object_with_behavior(id_bhvStar,
+                function(g)
+                    starspawnedloop(g);
+
+                    if (codeActive(25)) then
+                        --bhv_koopa_update();
+                    end
+                end)
+
+            ---tuxie.inc.c
+
+            if (codeActive(121)) then
+                for_each_object_with_behavior(id_bhvSmallPenguin, function(g)
+                    spawn_sync_object(id_bhvBreakableBoxSmall, E_MODEL_BREAKABLE_BOX_SMALL, g.oPosX, g.oPosY, g.oPosZ,
+                        nil);
+                    obj_mark_for_deletion(g);
+                end
+                )
+            end
+            ---whomp.inc.c
+            if (codeActive(144)) then
+                for_each_object_with_behavior(id_bhvSmallWhomp, function(g)
+                    if g.oAction ~= 9 then
+                        if g.oBehParams2ndByte == 0 then
+                            g.oBehParams2ndByte = 1
+                            g.oHealth = 3;
+                        end
+                    end
+                end)
+            end]]
+
+            --- more
+            if (codeActive(124)) then
+                for_each_obj(function(g)
+                    --g.oGravity = g.oGravity / 2
+                    if g.behavior ~= get_behavior_from_id(id_bhvKingBobomb) then
+                        g.oVelY = g.oVelY / 2
+                    end
+                end);
+            end
+
+            if (codeActive(147)) then
+                for_each_obj(function(g)
+                    g.oForwardVel = g.oForwardVel * 2
+                end);
+            end
+
 
             -- add processing for more codes here:
         end
     end
     -- or here for unlocal(global)
 
-    -- bobomb.inc.c
-
-    if (codeActive(1)) then
-        for_each_object_with_behavior(id_bhvBobomb,
-            function(g) if g.oHeldState == HELD_HELD then g.oBobombFuseTimer = 153; end end)
-    end
-
-    --bubba.inc.c
-    if (codeActive(145)) then
-        for_each_object_with_behavior(id_bhvBubba,
-            function(g)
-                -- bhv_bubba_loop()
-                -- bhv_bubba_loop()
-            end)
-    end
-
-    --chainchomp.inc.c
-    if (codeActive(125)) then
-        for_each_object_with_behavior(id_bhvChainChomp,
-            function(g) g.parentObj = m.marioObj end)
-    end
-
-    --goomba.inc.c
-
-    if (codeActive(119)) then
-        for_each_object_with_behavior(id_bhvGoomba,
-            function(g) g.oGoombaSize = 2; end)
-    end
-
-    --spawnstar.inc.c
-    local currentLevelStarFlags = save_file_get_star_flags(get_current_save_file_num() - 1,
-        gNetworkPlayers[0].currCourseNum - 1);
-
-    for_each_object_with_behavior(id_bhvStarSpawnCoordinates,
-        function(g)
-            starspawnedloop(g);
-
-            if (codeActive(25)) then
-                -- bhv_koopa_update();
-            end
-        end)
-
-    for_each_object_with_behavior(id_bhvSpawnedStar,
-        function(g)
-            starspawnedloop(g);
-
-            if (codeActive(25)) then
-                --  bhv_koopa_update();
-            end
-        end)
-    for_each_object_with_behavior(id_bhvSpawnedStarNoLevelExit,
-        function(g)
-            starspawnedloop(g);
-
-            if (codeActive(25)) then
-                --bhv_koopa_update();
-            end
-        end)
-    for_each_object_with_behavior(id_bhvStar,
-        function(g)
-            starspawnedloop(g);
-
-            if (codeActive(25)) then
-                --bhv_koopa_update();
-            end
-        end)
-
-    ---tuxie.inc.c
-
-    if (codeActive(121)) then
-        for_each_object_with_behavior(id_bhvSmallPenguin, function(g)
-            spawn_sync_object(id_bhvBreakableBoxSmall, E_MODEL_BREAKABLE_BOX_SMALL, g.oPosX, g.oPosY, g.oPosZ,
-                nil);
-            obj_mark_for_deletion(g);
-        end
-        )
-    end
-    ---whomp.inc.c
-    if (codeActive(144)) then
-        for_each_object_with_behavior(id_bhvSmallWhomp, function(g)
-            if g.oAction ~= 9 then
-                if g.oBehParams2ndByte == 0 then
-                    g.oBehParams2ndByte = 1
-                    g.oHealth = 3;
-                end
-            end
-        end)
-    end
-
-    --- more
-    if (codeActive(124)) then
-        for_each_obj(function(g)
-            --g.oGravity = g.oGravity / 2
-            if g.behavior ~= get_behavior_from_id(id_bhvKingBobomb) then
-                g.oVelY = g.oVelY / 2
-            end
-        end);
-    end
-
-    if (codeActive(147)) then
-        for_each_obj(function(g)
-            g.oForwardVel = g.oForwardVel * 2
-        end);
-    end
 
     -- all
 
@@ -1807,7 +1808,7 @@ local function setchaostimer_cmd(r)
     local val = tonumber(r)
     if val then
         if val < 1 then
-            djui_chat_message_create("Number is smaller than 0!")
+            djui_chat_message_create("Number is smaller than 1!")
             return true
         end
     end
@@ -1860,3 +1861,71 @@ if network_is_server() then
     hook_chat_command("chaotic", "Sets the chaoticness of the mod (Default = 20)", setchaoticness_cmd)
     hook_chat_command("chtimer", "Sets the Chaos timer (Default = 120)", setchaostimer_cmd)
 end
+
+hook_behavior(id_bhvBobomb, get_object_list_from_behavior(get_behavior_from_id(id_bhvBobomb)), false, nil,
+    function(g)
+        if g.oHeldState == HELD_HELD then
+            g.oBobombFuseTimer = 153;
+        end
+    end)
+
+
+hook_behavior(id_bhvBubba, get_object_list_from_behavior(get_behavior_from_id(id_bhvBubba)), false, nil,
+    function(g)
+        if (codeActive(145)) then
+            bhv_bubba_loop()
+            bhv_bubba_loop()
+        end
+    end)
+
+hook_behavior(id_bhvChainChomp, get_object_list_from_behavior(get_behavior_from_id(id_bhvChainChomp)), false, nil,
+    function(g)
+        if (codeActive(125)) then
+            g.parentObj = nearest_player_to_object(g)
+        end
+    end)
+
+hook_behavior(id_bhvGoomba, get_object_list_from_behavior(get_behavior_from_id(id_bhvGoomba)), false, function(g)
+    if (codeActive(119)) then
+        g.oGoombaSize = 2
+    end
+end, nil)
+
+function allStars(g)
+    starspawnedloop(g)
+end
+
+function allstarsloop(g)
+    if (codeActive(25)) then
+        bhv_koopa_update();
+    end
+end
+
+hook_behavior(id_bhvStar, get_object_list_from_behavior(get_behavior_from_id(id_bhvStar)), false, allStars, allstarsloop)
+hook_behavior(id_bhvStarSpawnCoordinates, get_object_list_from_behavior(get_behavior_from_id(id_bhvStarSpawnCoordinates)),
+    false, allStars, allstarsloop)
+hook_behavior(id_bhvSpawnedStar, get_object_list_from_behavior(get_behavior_from_id(id_bhvSpawnedStar)), false, allStars,
+allstarsloop)
+hook_behavior(id_bhvSpawnedStarNoLevelExit,
+    get_object_list_from_behavior(get_behavior_from_id(id_bhvSpawnedStarNoLevelExit)), false, allStars, allstarsloop)
+
+hook_behavior(id_bhvSmallPenguin, get_object_list_from_behavior(get_behavior_from_id(id_bhvSmallPenguin)), false, nil,
+    function(g)
+        if (codeActive(121)) then
+            spawn_sync_object(id_bhvBreakableBoxSmall, E_MODEL_BREAKABLE_BOX_SMALL, g.oPosX, g.oPosY, g.oPosZ,
+                nil);
+            obj_mark_for_deletion(g);
+        end
+    end)
+
+hook_behavior(id_bhvSmallWhomp, get_object_list_from_behavior(get_behavior_from_id(id_bhvSmallWhomp)), false, nil,
+    function(g)
+        if (codeActive(144)) then
+            if g.oAction ~= 9 then
+                if g.oBehParams2ndByte == 0 then
+                    g.oBehParams2ndByte = 1
+                    g.oHealth = 3;
+                end
+            end
+        end
+    end)
