@@ -556,7 +556,7 @@ local function chaos_processing(m)
         if (newCodeTimer > CODELENGTH) then -- minimum wait time for a new code
             newCodeTimer = 0
             j = random_u16() % CODECOUNT    -- select a code
-            --j = 104
+            --j = 38
 
             i = random_u16() % gGlobalSyncTable.MAXCODES -- select an index for the code to exist in
             -- make some codes less likely in some stages
@@ -875,35 +875,6 @@ local function chaos_processing(m)
             gServerSettings.stayInLevelAfterStar = 0
         end
 
-        for_each_object_with_behavior(id_bhvDoor, function(o)
-            if (codeActive(37)) then
-                o.activeFlags = 0;
-                spawn_sync_object(id_bhvExplosion, E_MODEL_EXPLOSION, o.oPosX, o.oPosY, o.oPosZ, nil);
-            end
-        end
-        )
-        for_each_object_with_behavior(id_bhvDoorWarp, function(o)
-            if (codeActive(38)) and m.action == ACT_PUSHING_DOOR or (codeActive(38)) and m.action == ACT_PULLING_DOOR then
-                m.faceAngle.y = m.faceAngle.y + 0x8000;
-                m.marioObj.oMoveAngleYaw = m.marioObj.oMoveAngleYaw + 0x8000;
-                m.marioObj.oFaceAngleYaw = m.marioObj.oFaceAngleYaw + 0x8000;
-                o.oMoveAngleYaw = o.oMoveAngleYaw + 0x8000;
-                o.oFaceAngleYaw = o.oFaceAngleYaw + 0x8000;
-            end
-        end
-        )
-
-        for_each_object_with_behavior(id_bhvDoor, function(o)
-            if (codeActive(38)) and m.action == ACT_PUSHING_DOOR or (codeActive(38)) and m.action == ACT_PULLING_DOOR then
-                m.faceAngle.y = m.faceAngle.y + 0x8000;
-                m.marioObj.oMoveAngleYaw = m.marioObj.oMoveAngleYaw + 0x8000;
-                m.marioObj.oFaceAngleYaw = m.marioObj.oFaceAngleYaw + 0x8000;
-                o.oMoveAngleYaw = o.oMoveAngleYaw + 0x8000;
-                o.oFaceAngleYaw = o.oFaceAngleYaw + 0x8000;
-            end
-        end
-        )
-
         if (codeActive(123)) then
             if m.heldObj then
                 mario_stop_riding_and_holding(m);
@@ -1218,7 +1189,8 @@ function chaos_processing_hud()
     local m = gMarioStates[0]
     if quicktime ~= 0 then
         quicktime = quicktime - 1
-        djui_hud_print_text("PRESS DPAD DOWN OR DIE", 40, 60, 1)
+        djui_hud_print_text("PRESS DPAD DOWN OR DIE",
+            djui_hud_get_screen_width() * 0.5 - djui_hud_measure_text("PRESS DPAD DOWN OR DIE") * 1 * 0.5, 60, 1)
         if quicktime == 0 then
             m.health = 0
         end
@@ -1230,7 +1202,8 @@ function chaos_processing_hud()
 
     if quicktime2 ~= 0 then
         quicktime2 = quicktime2 - 1
-        djui_hud_print_text("PRESS DPAD DOWN TO DIE", 40, 60, 1)
+        djui_hud_print_text("PRESS DPAD DOWN TO DIE",
+            djui_hud_get_screen_width() * 0.5 - djui_hud_measure_text("PRESS DPAD DOWN TO DIE") * 1 * 0.5, 60, 1)
         if m.controller.buttonPressed & D_JPAD ~= 0 then
             quicktime2 = 0
             m.health = 0
@@ -1305,6 +1278,19 @@ hook_event(HOOK_ON_PLAY_SOUND, function(s)
         if ((s & 0xFF000000) == 0x24000000) then
             s = 0x24000000 | ((random_u16() & 0x3f) << 16) | (s & 0xFFFF);
             return s
+        end
+    end
+end)
+hook_event(HOOK_ON_INTERACT, function(m, o, t, s)
+    if (codeActive(38)) then
+        if m.action == ACT_PUSHING_DOOR or m.action == ACT_PULLING_DOOR then
+            if t == INTERACT_DOOR or t == INTERACT_WARP_DOOR then
+                m.faceAngle.y = m.faceAngle.y + 0x8000;
+                m.marioObj.oMoveAngleYaw = m.marioObj.oMoveAngleYaw + 0x8000;
+                m.marioObj.oFaceAngleYaw = m.marioObj.oFaceAngleYaw + 0x8000;
+                o.oMoveAngleYaw = o.oMoveAngleYaw + 0x8000;
+                o.oFaceAngleYaw = o.oFaceAngleYaw + 0x8000
+            end
         end
     end
 end)
