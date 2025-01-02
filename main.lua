@@ -406,7 +406,7 @@ local timer = {
     0,
     0,
 }
-local CODELENGTH = 10
+gGlobalSyncTable.CODELENGTH = 120
 local quicktime = 0
 local quicktime2 = 0
 local validTypes = {
@@ -453,58 +453,78 @@ end
 
 local function chaos_code_obj_all_behaviorscriptc(obj)
     local gCurrentObject = obj
-    local gMarioObject = gMarioStates[0].marioObj
-    if codeActive(9) then
-        if gMarioObject then
-            local x = gMarioObject.oPosX - gCurrentObject.oPosX
-            local y = gMarioObject.oPosY - gCurrentObject.oPosY
-            local z = gMarioObject.oPosZ - gCurrentObject.oPosZ
-            if math.sqrt(x * x + y * y + z * z) > 1.0 then
-                if gCurrentObject.header.gfx.sharedChild then
-                    local distance = math.sqrt(x * x + y * y + z * z)
-                    local xt = x / distance * 10.0
-                    local yt = y / distance * 10.0
-                    local zt = z / distance * 10.0
-                    gCurrentObject.oPosX = gCurrentObject.oPosX + xt
-                    gCurrentObject.oPosY = gCurrentObject.oPosY + yt
-                    gCurrentObject.oPosZ = gCurrentObject.oPosZ + zt
+    local gMarioObject = nearest_mario_state_to_object(gCurrentObject).marioObj
+    for im = 0, MAX_PLAYERS - 1 do
+        if gPlayerSyncTable[gMarioStates[im].playerIndex].objfollowall then
+            --gMarioObject = gMarioStates[im].marioObj
+            if gNetworkPlayers[0].currLevelNum == gNetworkPlayers[gMarioStates[im].playerIndex].currLevelNum and gNetworkPlayers[0].currAreaIndex == gNetworkPlayers[gMarioStates[im].playerIndex].currAreaIndex and gNetworkPlayers[0].currActNum == gNetworkPlayers[gMarioStates[im].playerIndex].currActNum then
+                if gMarioObject then
+                    if gCurrentObject.behavior ~= get_behavior_from_id(id_bhvActSelectorStarType) then
+                        local x = gMarioObject.oPosX - gCurrentObject.oPosX
+                        local y = gMarioObject.oPosY - gCurrentObject.oPosY
+                        local z = gMarioObject.oPosZ - gCurrentObject.oPosZ
+                        if math.sqrt(x * x + y * y + z * z) > 1.0 then
+                            if gCurrentObject.header.gfx.sharedChild then
+                                local distance = math.sqrt(x * x + y * y + z * z)
+                                local xt = x / distance * 10.0
+                                local yt = y / distance * 10.0
+                                local zt = z / distance * 10.0
+                                gCurrentObject.oPosX = gCurrentObject.oPosX + xt
+                                gCurrentObject.oPosY = gCurrentObject.oPosY + yt
+                                gCurrentObject.oPosZ = gCurrentObject.oPosZ + zt
+                            end
+                        end
+                    end
                 end
             end
         end
     end
 
-    if codeActive(41) then
-        gCurrentObject.oFaceAnglePitch = gCurrentObject.oFaceAnglePitch + math.floor(gCurrentObject.oPosX / 10.0)
-        gCurrentObject.oFaceAngleYaw = gCurrentObject.oFaceAngleYaw + math.floor(gCurrentObject.oPosX / 10.0)
-        gCurrentObject.oMoveAngleYaw = gCurrentObject.oMoveAngleYaw + math.floor(gCurrentObject.oPosX / 10.0)
-        gCurrentObject.oFaceAngleRoll = gCurrentObject.oFaceAngleRoll + math.floor(gCurrentObject.oPosX / 10.0)
-    end
-
-    if codeActive(88) then
-        if (random_u16() & 0x1f) == 0 then
-            gCurrentObject.header.gfx.scale.x = gCurrentObject.header.gfx.scale.x * (random_float() * 2)
-            gCurrentObject.header.gfx.scale.y = gCurrentObject.header.gfx.scale.y * (random_float() * 2)
-            gCurrentObject.header.gfx.scale.z = gCurrentObject.header.gfx.scale.z * (random_float() * 2)
+    for im = 0, MAX_PLAYERS - 1 do
+        if gPlayerSyncTable[gMarioStates[im].playerIndex].objrandomangle then
+            --gMarioObject = gMarioStates[im].marioObj
+            if gNetworkPlayers[0].currLevelNum == gNetworkPlayers[gMarioStates[im].playerIndex].currLevelNum and gNetworkPlayers[0].currAreaIndex == gNetworkPlayers[gMarioStates[im].playerIndex].currAreaIndex and gNetworkPlayers[0].currActNum == gNetworkPlayers[gMarioStates[im].playerIndex].currActNum then
+                gCurrentObject.oFaceAnglePitch = gCurrentObject.oFaceAnglePitch + math.floor(gCurrentObject.oPosX / 10.0)
+                gCurrentObject.oFaceAngleYaw = gCurrentObject.oFaceAngleYaw + math.floor(gCurrentObject.oPosX / 10.0)
+                gCurrentObject.oMoveAngleYaw = gCurrentObject.oMoveAngleYaw + math.floor(gCurrentObject.oPosX / 10.0)
+                gCurrentObject.oFaceAngleRoll = gCurrentObject.oFaceAngleRoll + math.floor(gCurrentObject.oPosX / 10.0)
+            end
         end
     end
-
+    for im = 0, MAX_PLAYERS - 1 do
+        if gPlayerSyncTable[gMarioStates[im].playerIndex].objrandomscale then
+            --gMarioObject = gMarioStates[im].marioObj
+            if gNetworkPlayers[0].currLevelNum == gNetworkPlayers[gMarioStates[im].playerIndex].currLevelNum and gNetworkPlayers[0].currAreaIndex == gNetworkPlayers[gMarioStates[im].playerIndex].currAreaIndex and gNetworkPlayers[0].currActNum == gNetworkPlayers[gMarioStates[im].playerIndex].currActNum then
+                if (random_u16() & 0x1f) == 0 then
+                    gCurrentObject.header.gfx.scale.x = gCurrentObject.header.gfx.scale.x * (random_float() * 2)
+                    gCurrentObject.header.gfx.scale.y = gCurrentObject.header.gfx.scale.y * (random_float() * 2)
+                    gCurrentObject.header.gfx.scale.z = gCurrentObject.header.gfx.scale.z * (random_float() * 2)
+                end
+            end
+        end
+    end
     if codeActive(96) then
         gCurrentObject.header.gfx.node.flags = gCurrentObject.header.gfx.node.flags | GRAPH_RENDER_BILLBOARD
     end
 end
 
-local dumbTimer = 0;
+gGlobalSyncTable.dumbTimer = 0;
 local function chaos_code_obj_all_surface_loadc(obj)
     local gCurrentObject = obj
     if obj.collisionData ~= nil then
         if (codeActive(135)) then
-            gCurrentObject.oPosY = gCurrentObject.oPosY + sins(dumbTimer) * 8;
-            dumbTimer = dumbTimer + 0x80;
+            gCurrentObject.oPosY = gCurrentObject.oPosY + sins(gGlobalSyncTable.dumbTimer) * 8;
+            gGlobalSyncTable.dumbTimer = gGlobalSyncTable.dumbTimer + 0x80;
         end
 
-        if (codeActive(139)) then
-            gCurrentObject.oFaceAngleYaw = gCurrentObject.oFaceAngleYaw + 0x30;
-            gCurrentObject.oMoveAngleYaw = gCurrentObject.oFaceAngleYaw + 0x30;
+        for im = 0, MAX_PLAYERS - 1 do
+            if gPlayerSyncTable[gMarioStates[im].playerIndex].objrandomyaw then
+                --gMarioObject = gMarioStates[im].marioObj
+                if gNetworkPlayers[0].currLevelNum == gNetworkPlayers[gMarioStates[im].playerIndex].currLevelNum and gNetworkPlayers[0].currAreaIndex == gNetworkPlayers[gMarioStates[im].playerIndex].currAreaIndex and gNetworkPlayers[0].currActNum == gNetworkPlayers[gMarioStates[im].playerIndex].currActNum then
+                    gCurrentObject.oFaceAngleYaw = gCurrentObject.oFaceAngleYaw + 0x30;
+                    gCurrentObject.oMoveAngleYaw = gCurrentObject.oFaceAngleYaw + 0x30;
+                end
+            end
         end
     end
 end
@@ -1011,9 +1031,9 @@ local function chaos_processing(m)
                 end
             end
             newCodeTimer = newCodeTimer + 1
-            if (newCodeTimer > CODELENGTH) then -- minimum wait time for a new code
+            if (newCodeTimer > gGlobalSyncTable.CODELENGTH) then -- minimum wait time for a new code
                 newCodeTimer = 0
-                j = random_u16() % CODECOUNT    -- select a code
+                j = random_u16() % CODECOUNT                     -- select a code
                 --j = 7
 
                 i = random_u16() % gGlobalSyncTable.MAXCODES -- select an index for the code to exist in
@@ -1239,14 +1259,7 @@ local function chaos_processing(m)
                 --sequence_player_set_tempo(SEQ_PLAYER_SFX, 0x9000)
             end
 
-            --behavior_script.c
-            for_each_obj(chaos_code_obj_all_behaviorscriptc)
-
             --surface collision.c: not possible
-
-            --surface_load.c
-
-            for_each_obj(chaos_code_obj_all_surface_loadc)
 
             --- camera.c
 
@@ -1503,113 +1516,11 @@ local function chaos_processing(m)
                 codeClear(6)
             end
 
-            if (codeActive(124)) then
-                for_each_obj(function(g)
-                    --g.oGravity = g.oGravity / 2
-                    g.oVelY = g.oVelY / 2
-                end);
-            end
-
-            if (codeActive(147)) then
-                for_each_obj(function(g)
-                    g.oForwardVel = g.oForwardVel * 2
-                end);
-            end
-
             --object list processor ----- sadly, game crash
             if (codeActive(79)) then
                 --gPlayerSyncTable[0].modelId = (E_MODEL_WOODEN_SIGNPOST);
             else
                 -- gPlayerSyncTable[0].modelId = (nil);
-            end
-
-            -- bobomb.inc.c
-
-            if (codeActive(1)) then
-                for_each_object_with_behavior(id_bhvBobomb,
-                    function(g) if g.oHeldState == HELD_HELD then g.oBobombFuseTimer = 153; end end)
-            end
-
-            --bubba.inc.c
-            if (codeActive(145)) then
-                for_each_object_with_behavior(id_bhvBubba,
-                    function(g)
-                        bhv_bubba_loop()
-                        bhv_bubba_loop()
-                    end)
-            end
-
-            --chainchomp.inc.c
-            if (codeActive(125)) then
-                for_each_object_with_behavior(id_bhvChainChomp,
-                    function(g) g.parentObj = m.marioObj end)
-            end
-
-            --goomba.inc.c
-
-            if (codeActive(119)) then
-                for_each_object_with_behavior(id_bhvGoomba,
-                    function(g) g.oGoombaSize = 2; end)
-            end
-
-            --spawnstar.inc.c
-            local currentLevelStarFlags = save_file_get_star_flags(get_current_save_file_num() - 1,
-                gNetworkPlayers[0].currCourseNum - 1);
-
-            for_each_object_with_behavior(id_bhvStarSpawnCoordinates,
-                function(g)
-                    starspawnedloop(g);
-
-                    if (codeActive(25)) then
-                        -- bhv_koopa_update();
-                    end
-                end)
-
-            for_each_object_with_behavior(id_bhvSpawnedStar,
-                function(g)
-                    starspawnedloop(g);
-
-                    if (codeActive(25)) then
-                        --  bhv_koopa_update();
-                    end
-                end)
-            for_each_object_with_behavior(id_bhvSpawnedStarNoLevelExit,
-                function(g)
-                    starspawnedloop(g);
-
-                    if (codeActive(25)) then
-                        --bhv_koopa_update();
-                    end
-                end)
-            for_each_object_with_behavior(id_bhvStar,
-                function(g)
-                    starspawnedloop(g);
-
-                    if (codeActive(25)) then
-                        --bhv_koopa_update();
-                    end
-                end)
-
-            ---tuxie.inc.c
-
-            if (codeActive(121)) then
-                for_each_object_with_behavior(id_bhvSmallPenguin, function(g)
-                    spawn_sync_object(id_bhvBreakableBoxSmall, E_MODEL_BREAKABLE_BOX_SMALL, g.oPosX, g.oPosY, g.oPosZ,
-                        nil);
-                    obj_mark_for_deletion(g);
-                end
-                )
-            end
-            ---whomp.inc.c
-            if (codeActive(144)) then
-                for_each_object_with_behavior(id_bhvSmallWhomp, function(g)
-                    if g.oAction ~= 9 then
-                        if g.oBehParams2ndByte == 0 then
-                            g.oBehParams2ndByte = 1
-                            g.oHealth = 3;
-                        end
-                    end
-                end)
             end
 
             ---sync deez nuts
@@ -1633,10 +1544,144 @@ local function chaos_processing(m)
                 gPlayerSyncTable[0].scaleluigi = false
             end
 
+            if codeActive(9) then
+                gPlayerSyncTable[0].objfollowall = true
+            else
+                gPlayerSyncTable[0].objfollowall = false
+            end
+
+            if codeActive(41) then
+                gPlayerSyncTable[0].objrandomangle = true
+            else
+                gPlayerSyncTable[0].objrandomangle = false
+            end
+
+            if codeActive(88) then
+                gPlayerSyncTable[0].objrandomscale = true
+            else
+                gPlayerSyncTable[0].objrandomscale = false
+            end
+
+            if (codeActive(139)) then
+                gPlayerSyncTable[0].objrandomyaw = true
+            else
+                gPlayerSyncTable[0].objrandomyaw = false
+            end
+
+
             -- add processing for more codes here:
         end
     end
-    -- or here for unlocal
+    -- or here for unlocal(global)
+
+    -- bobomb.inc.c
+
+    if (codeActive(1)) then
+        for_each_object_with_behavior(id_bhvBobomb,
+            function(g) if g.oHeldState == HELD_HELD then g.oBobombFuseTimer = 153; end end)
+    end
+
+    --bubba.inc.c
+    if (codeActive(145)) then
+        for_each_object_with_behavior(id_bhvBubba,
+            function(g)
+                -- bhv_bubba_loop()
+                -- bhv_bubba_loop()
+            end)
+    end
+
+    --chainchomp.inc.c
+    if (codeActive(125)) then
+        for_each_object_with_behavior(id_bhvChainChomp,
+            function(g) g.parentObj = m.marioObj end)
+    end
+
+    --goomba.inc.c
+
+    if (codeActive(119)) then
+        for_each_object_with_behavior(id_bhvGoomba,
+            function(g) g.oGoombaSize = 2; end)
+    end
+
+    --spawnstar.inc.c
+    local currentLevelStarFlags = save_file_get_star_flags(get_current_save_file_num() - 1,
+        gNetworkPlayers[0].currCourseNum - 1);
+
+    for_each_object_with_behavior(id_bhvStarSpawnCoordinates,
+        function(g)
+            starspawnedloop(g);
+
+            if (codeActive(25)) then
+                -- bhv_koopa_update();
+            end
+        end)
+
+    for_each_object_with_behavior(id_bhvSpawnedStar,
+        function(g)
+            starspawnedloop(g);
+
+            if (codeActive(25)) then
+                --  bhv_koopa_update();
+            end
+        end)
+    for_each_object_with_behavior(id_bhvSpawnedStarNoLevelExit,
+        function(g)
+            starspawnedloop(g);
+
+            if (codeActive(25)) then
+                --bhv_koopa_update();
+            end
+        end)
+    for_each_object_with_behavior(id_bhvStar,
+        function(g)
+            starspawnedloop(g);
+
+            if (codeActive(25)) then
+                --bhv_koopa_update();
+            end
+        end)
+
+    ---tuxie.inc.c
+
+    if (codeActive(121)) then
+        for_each_object_with_behavior(id_bhvSmallPenguin, function(g)
+            spawn_sync_object(id_bhvBreakableBoxSmall, E_MODEL_BREAKABLE_BOX_SMALL, g.oPosX, g.oPosY, g.oPosZ,
+                nil);
+            obj_mark_for_deletion(g);
+        end
+        )
+    end
+    ---whomp.inc.c
+    if (codeActive(144)) then
+        for_each_object_with_behavior(id_bhvSmallWhomp, function(g)
+            if g.oAction ~= 9 then
+                if g.oBehParams2ndByte == 0 then
+                    g.oBehParams2ndByte = 1
+                    g.oHealth = 3;
+                end
+            end
+        end)
+    end
+
+    --- more
+    if (codeActive(124)) then
+        for_each_obj(function(g)
+            --g.oGravity = g.oGravity / 2
+            if g.behavior ~= get_behavior_from_id(id_bhvKingBobomb) then
+                g.oVelY = g.oVelY / 2
+            end
+        end);
+    end
+
+    if (codeActive(147)) then
+        for_each_obj(function(g)
+            g.oForwardVel = g.oForwardVel * 2
+        end);
+    end
+
+    -- all
+
+    -- sync fieds
 
     if (gPlayerSyncTable[m.playerIndex].changepcolor) then
         for ppart = PANTS, PLAYER_PART_MAX - 1 do
@@ -1656,6 +1701,14 @@ local function chaos_processing(m)
             vec3f_set(gMarioStates[m.playerIndex].marioObj.header.gfx.scale, 1.0, 1.15, 1.0)
         end
     end
+end
+
+local function chaos_processing_slower()
+    --behavior_script.c
+    for_each_obj(chaos_code_obj_all_behaviorscriptc)
+    --surface_load.c
+
+    for_each_obj(chaos_code_obj_all_surface_loadc)
 end
 local validLevels = { [0] = 4, 5, 6, 7, 8, 12, 10, 11, 12, 13, 14, 15, 13, 17, 18, 19, 20, 21, 22, 23, 24, 15, 27, 28, 29, 30, 31, 33, 34, 36, 9, 6 };
 
@@ -1750,6 +1803,22 @@ local function setchaoticness_cmd(r)
     return false
 end
 
+local function setchaostimer_cmd(r)
+    local val = tonumber(r)
+    if val then
+        if val < 1 then
+            djui_chat_message_create("Number is smaller than 0!")
+            return true
+        end
+    end
+    if val then
+        gGlobalSyncTable.CODELENGTH = val
+        djui_chat_message_create("Chaos Timer set to: " .. tostring(val) .. "!")
+        return true
+    end
+    return false
+end
+
 hook_event(HOOK_OBJECT_SET_MODEL, function(o)
     if obj_has_behavior_id(o, id_bhvMario) ~= 0 then
         local i = network_local_index_from_global(o.globalPlayerIndex)
@@ -1760,6 +1829,7 @@ hook_event(HOOK_OBJECT_SET_MODEL, function(o)
 end)
 
 hook_event(HOOK_MARIO_UPDATE, chaos_processing)
+hook_event(HOOK_UPDATE, chaos_processing_slower)
 hook_event(HOOK_ON_HUD_RENDER_BEHIND, chaos_processing_hud)
 hook_event(HOOK_ON_HUD_RENDER, debug_codes)
 hook_event(HOOK_ON_WARP, chaos_process_random_tp)
@@ -1787,5 +1857,6 @@ end)
 if network_is_server() then
     hook_chat_command("d", "Debug", debg_cmd)
     hook_chat_command("ad", "aDebug", debg_cmd2)
-    hook_chat_command("set-chaotic", "Sets the chaoticness of the mod (Default = 20)", setchaoticness_cmd)
+    hook_chat_command("chaotic", "Sets the chaoticness of the mod (Default = 20)", setchaoticness_cmd)
+    hook_chat_command("chtimer", "Sets the Chaos timer (Default = 120)", setchaostimer_cmd)
 end
