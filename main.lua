@@ -1183,7 +1183,7 @@ local function chaos_process_random_tp()
     end
 end
 
-function chaos_processing_hud()
+local function chaos_processing_hud()
     djui_hud_set_font(FONT_HUD)
     djui_hud_set_resolution(RESOLUTION_N64)
     local m = gMarioStates[0]
@@ -1212,7 +1212,7 @@ function chaos_processing_hud()
 end
 
 local codedebuglocal = false
-function debug_codes()
+local function debug_codes()
     djui_hud_set_font(FONT_HUD)
     djui_hud_set_resolution(RESOLUTION_N64)
     local x = 0
@@ -1233,13 +1233,13 @@ function debug_codes()
     -- texture_override_set("tree_seg3_texture_0302DE28", gTextures.mario_head)
 end
 
-function debg_cmd()
+local function debg_cmd()
     codedebuglocal = not codedebuglocal
     djui_chat_message_create("debug is now " .. tostring(codedebuglocal))
     return true
 end
 
-function setchaoticness_cmd(r)
+local function setchaoticness_cmd(r)
     local val = tonumber(r)
 
     if val > 150 then
