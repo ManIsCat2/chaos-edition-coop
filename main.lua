@@ -2,9 +2,9 @@
 -- pausable: false
 
 local CODETEST = 0
-gGlobalSyncTable.MAXCODES = 20
+gGlobalSyncTable.MAXCODES = 8
 local CODECOUNT = 150
-local DEBUGTHECODE = true
+local DEBUGTHECODE = false
 local codeSelected = {
     [0] = CODETEST,
     CODETEST,
@@ -1685,23 +1685,24 @@ end
 
 local function setchaoticness_cmd(r)
     local val = tonumber(r)
-
-    if val > 150 then
-        djui_chat_message_create("Number is bigger than 150!")
-        return true
-    end
-
-    if val < 1 then
-        djui_chat_message_create("Number is smaller than 0!")
-        return true
-    end
-
     if val then
+        if val > 150 then
+            djui_chat_message_create("Number is bigger than 150!")
+            return true
+        end
+
+        if val < 1 then
+            djui_chat_message_create("Number is smaller than 0!")
+            return true
+        end
+
+
         gGlobalSyncTable.MAXCODES = val
         djui_chat_message_create("Chaoticness set to " .. tostring(val) .. "!")
         return true
     end
-    return false
+    djui_chat_message_create("No input number!")
+    return true
 end
 
 local function setchaostimer_cmd(r)
@@ -1717,7 +1718,8 @@ local function setchaostimer_cmd(r)
         djui_chat_message_create("Chaos Timer set to " .. tostring(val) .. "!")
         return true
     end
-    return false
+    djui_chat_message_create("No input number!")
+    return true
 end
 
 hook_event(HOOK_OBJECT_SET_MODEL, function(o)
