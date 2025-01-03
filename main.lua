@@ -4,6 +4,7 @@
 local CODETEST = 0
 gGlobalSyncTable.MAXCODES = 20
 local CODECOUNT = 150
+local DEBUGTHECODE = true
 local codeSelected = {
     [0] = CODETEST,
     CODETEST,
@@ -1026,15 +1027,19 @@ local function chaos_processing(m)
                 if (codeTimers[i]) then
                     codeTimers[i] = codeTimers[i] - 1
                     if (codeTimers[i] == 0) then
-                        codeSelected[i] = 0
+                        if not DEBUGTHECODE then
+                            codeSelected[i] = 0
+                        end
                     end
                 end
             end
             newCodeTimer = newCodeTimer + 1
             if (newCodeTimer > gGlobalSyncTable.CODELENGTH) then -- minimum wait time for a new code
                 newCodeTimer = 0
-                j = random_u16() % CODECOUNT                     -- select a code
-                --j = 25
+                if not DEBUGTHECODE then
+                    j = random_u16() % CODECOUNT -- select a code
+                    --j = 123
+                end
 
                 i = random_u16() % gGlobalSyncTable.MAXCODES -- select an index for the code to exist in
                 -- make some codes less likely in some stages
@@ -1046,8 +1051,8 @@ local function chaos_processing(m)
                         end
                     end
                 end
-                codeSelected[i] = j      -- turn on code number j
-                codeTimers[i] = timer[j] -- predetermined timers for some codes
+                if not DEBUGTHECODE then codeSelected[i] = j end      -- turn on code number j
+                if not DEBUGTHECODE then codeTimers[i] = timer[j] end -- predetermined timers for some codes
                 if (codeTimers[i] == 0) then
                     codeTimers[i] = 1800
                 end
@@ -1339,28 +1344,13 @@ local function chaos_processing(m)
             -- interaction.c
 
             if (codeActive(19)) then
-                m.vel.y = m.vel.y * 8.0;
+                m.vel.y = m.vel.y * 1.5;
             end
 
             if (codeActive(115)) then
                 gServerSettings.stayInLevelAfterStar = 1
             else
                 gServerSettings.stayInLevelAfterStar = 0
-            end
-
-            if (codeActive(123)) then
-                if m.heldObj then
-                    mario_stop_riding_and_holding(m);
-                    -- o->oInteractStatus = INT_STATUS_INTERACTED | INT_STATUS_GRABBED_MARIO;
-
-                    --  m.faceAngle.y = o->oMoveAngleYaw;
-                    -- m->interactObj = o;
-                    -- m->usedObj = o;
-
-                    update_mario_sound_and_camera(m);
-                    play_character_sound(m, CHAR_SOUND_OOOF)
-                    set_mario_action(m, ACT_THROWN_FORWARD, 0);
-                end
             end
 
             --level_update.c
@@ -1753,9 +1743,15 @@ hook_event(HOOK_ON_PLAY_SOUND, function(s)
     end
 end)
 hook_event(HOOK_ON_INTERACT, function(m, o, t, s)
-    if (codeActive(38)) then
-        if m.action == ACT_PUSHING_DOOR or m.action == ACT_PULLING_DOOR then
-            if t == INTERACT_DOOR or t == INTERACT_WARP_DOOR then
+    if t == INTERACT_DOOR or t == INTERACT_WARP_DOOR then
+        if (codeActive(37)) then
+            obj_mark_for_deletion(o)
+            spawn_sync_object(id_bhvExplosion, E_MODEL_EXPLOSION, o.oPosX, o.oPosY, o.oPosZ, nil);
+            set_mario_action(m, ACT_THROWN_FORWARD, 0);
+        end
+
+        if (codeActive(38)) then
+            if m.action == ACT_PUSHING_DOOR or m.action == ACT_PULLING_DOOR then
                 m.faceAngle.y = m.faceAngle.y + 0x8000;
                 m.marioObj.oMoveAngleYaw = m.marioObj.oMoveAngleYaw + 0x8000;
                 m.marioObj.oFaceAngleYaw = m.marioObj.oFaceAngleYaw + 0x8000;
@@ -1764,8 +1760,30 @@ hook_event(HOOK_ON_INTERACT, function(m, o, t, s)
             end
         end
     end
+
+    if t == INTERACT_GRABBABLE then
+        if (codeActive(123)) then
+            mario_stop_riding_and_holding(m);
+            o.oInteractStatus = INT_STATUS_INTERACTED | INT_STATUS_GRABBED_MARIO;
+
+            m.faceAngle.y = o.oMoveAngleYaw;
+            m.interactObj = o;
+            m.usedObj = o;
+
+            update_mario_sound_and_camera(m);
+            play_character_sound(m, CHAR_SOUND_OOOF)
+            set_mario_action(m, ACT_THROWN_FORWARD, 0);
+        end
+    end
 end)
-if network_is_server() then
+if not DEBUGTHECODE then
+    if network_is_server() then
+        hook_chat_command("d", "Debug", debg_cmd)
+        hook_chat_command("ad", "aDebug", debg_cmd2)
+        hook_chat_command("chaotic", "Sets the chaoticness of the mod (Default = 20)", setchaoticness_cmd)
+        hook_chat_command("chtimer", "Sets the Chaos timer (Default = 120)", setchaostimer_cmd)
+    end
+else
     hook_chat_command("d", "Debug", debg_cmd)
     hook_chat_command("ad", "aDebug", debg_cmd2)
     hook_chat_command("chaotic", "Sets the chaoticness of the mod (Default = 20)", setchaoticness_cmd)
