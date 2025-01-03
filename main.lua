@@ -1034,7 +1034,7 @@ local function chaos_processing(m)
             if (newCodeTimer > gGlobalSyncTable.CODELENGTH) then -- minimum wait time for a new code
                 newCodeTimer = 0
                 j = random_u16() % CODECOUNT                     -- select a code
-                --j = 7
+                --j = 25
 
                 i = random_u16() % gGlobalSyncTable.MAXCODES -- select an index for the code to exist in
                 -- make some codes less likely in some stages
@@ -1568,95 +1568,6 @@ local function chaos_processing(m)
                 gPlayerSyncTable[0].objrandomyaw = false
             end
 
-            --[[ bobomb.inc.c
-
-            if (codeActive(1)) then
-                for_each_object_with_behavior(id_bhvBobomb,
-                    function(g) if g.oHeldState == HELD_HELD then g.oBobombFuseTimer = 153; end end)
-            end
-
-            --bubba.inc.c
-            if (codeActive(145)) then
-                for_each_object_with_behavior(id_bhvBubba,
-                    function(g)
-                        -- bhv_bubba_loop()
-                        -- bhv_bubba_loop()
-                    end)
-            end
-
-            --chainchomp.inc.c
-            if (codeActive(125)) then
-                for_each_object_with_behavior(id_bhvChainChomp,
-                    function(g) g.parentObj = m.marioObj end)
-            end
-
-            --goomba.inc.c
-
-            if (codeActive(119)) then
-                for_each_object_with_behavior(id_bhvGoomba,
-                    function(g) g.oGoombaSize = 2; end)
-            end
-
-            --spawnstar.inc.c
-            local currentLevelStarFlags = save_file_get_star_flags(get_current_save_file_num() - 1,
-                gNetworkPlayers[0].currCourseNum - 1);
-
-            for_each_object_with_behavior(id_bhvStarSpawnCoordinates,
-                function(g)
-                    starspawnedloop(g);
-
-                    if (codeActive(25)) then
-                        -- bhv_koopa_update();
-                    end
-                end)
-
-            for_each_object_with_behavior(id_bhvSpawnedStar,
-                function(g)
-                    starspawnedloop(g);
-
-                    if (codeActive(25)) then
-                        --  bhv_koopa_update();
-                    end
-                end)
-            for_each_object_with_behavior(id_bhvSpawnedStarNoLevelExit,
-                function(g)
-                    starspawnedloop(g);
-
-                    if (codeActive(25)) then
-                        --bhv_koopa_update();
-                    end
-                end)
-            for_each_object_with_behavior(id_bhvStar,
-                function(g)
-                    starspawnedloop(g);
-
-                    if (codeActive(25)) then
-                        --bhv_koopa_update();
-                    end
-                end)
-
-            ---tuxie.inc.c
-
-            if (codeActive(121)) then
-                for_each_object_with_behavior(id_bhvSmallPenguin, function(g)
-                    spawn_sync_object(id_bhvBreakableBoxSmall, E_MODEL_BREAKABLE_BOX_SMALL, g.oPosX, g.oPosY, g.oPosZ,
-                        nil);
-                    obj_mark_for_deletion(g);
-                end
-                )
-            end
-            ---whomp.inc.c
-            if (codeActive(144)) then
-                for_each_object_with_behavior(id_bhvSmallWhomp, function(g)
-                    if g.oAction ~= 9 then
-                        if g.oBehParams2ndByte == 0 then
-                            g.oBehParams2ndByte = 1
-                            g.oHealth = 3;
-                        end
-                    end
-                end)
-            end]]
-
             --- more
             if (codeActive(124)) then
                 for_each_obj(function(g)
@@ -1727,10 +1638,10 @@ local function chaos_processing_hud()
     djui_hud_set_font(FONT_HUD)
     djui_hud_set_resolution(RESOLUTION_N64)
     local m = gMarioStates[0]
+    local dx = djui_hud_get_screen_width() * 0.5 - djui_hud_measure_text("PRESS DPAD DOWN OR DIE") * 1 * 0.5
     if quicktime ~= 0 then
         quicktime = quicktime - 1
-        djui_hud_print_text("PRESS DPAD DOWN OR DIE",
-            djui_hud_get_screen_width() * 0.5 - djui_hud_measure_text("PRESS DPAD DOWN OR DIE") * 1 * 0.5, 60, 1)
+        djui_hud_print_text("PRESS DPAD DOWN OR DIE", dx, 60, 1)
         if quicktime == 0 then
             m.health = 0
         end
@@ -1742,8 +1653,7 @@ local function chaos_processing_hud()
 
     if quicktime2 ~= 0 then
         quicktime2 = quicktime2 - 1
-        djui_hud_print_text("PRESS DPAD DOWN TO DIE",
-            djui_hud_get_screen_width() * 0.5 - djui_hud_measure_text("PRESS DPAD DOWN TO DIE") * 1 * 0.5, 60, 1)
+        djui_hud_print_text("PRESS DPAD DOWN TO DIE", dx, 60, 1)
         if m.controller.buttonPressed & D_JPAD ~= 0 then
             quicktime2 = 0
             m.health = 0
@@ -1798,7 +1708,7 @@ local function setchaoticness_cmd(r)
 
     if val then
         gGlobalSyncTable.MAXCODES = val
-        djui_chat_message_create("Chaoticness set to: " .. tostring(val) .. "!")
+        djui_chat_message_create("Chaoticness set to " .. tostring(val) .. "!")
         return true
     end
     return false
@@ -1814,7 +1724,7 @@ local function setchaostimer_cmd(r)
     end
     if val then
         gGlobalSyncTable.CODELENGTH = val
-        djui_chat_message_create("Chaos Timer set to: " .. tostring(val) .. "!")
+        djui_chat_message_create("Chaos Timer set to " .. tostring(val) .. "!")
         return true
     end
     return false
@@ -1898,6 +1808,7 @@ end
 function allstarsloop(g)
     if (codeActive(25)) then
         bhv_koopa_update();
+        obj_set_model_extended(g, E_MODEL_STAR)
     end
 end
 
@@ -1905,7 +1816,7 @@ hook_behavior(id_bhvStar, get_object_list_from_behavior(get_behavior_from_id(id_
 hook_behavior(id_bhvStarSpawnCoordinates, get_object_list_from_behavior(get_behavior_from_id(id_bhvStarSpawnCoordinates)),
     false, allStars, allstarsloop)
 hook_behavior(id_bhvSpawnedStar, get_object_list_from_behavior(get_behavior_from_id(id_bhvSpawnedStar)), false, allStars,
-allstarsloop)
+    allstarsloop)
 hook_behavior(id_bhvSpawnedStarNoLevelExit,
     get_object_list_from_behavior(get_behavior_from_id(id_bhvSpawnedStarNoLevelExit)), false, allStars, allstarsloop)
 
