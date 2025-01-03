@@ -430,6 +430,11 @@ local validTypes = {
 local toadface = get_texture_info("releasio")
 local newCodeTimer = 0
 local camTimer = 0
+local get_behavior_from_id = get_behavior_from_id
+local obj_get_next = obj_get_next
+local obj_get_first = obj_get_first
+local nearest_mario_state_to_object = nearest_mario_state_to_object
+
 local function for_each_obj(func)
     for i = OBJ_LIST_EXT, NUM_OBJ_LISTS - 1 do
         local objF = obj_get_first(i)
@@ -443,13 +448,15 @@ local function for_each_obj(func)
     end
 end
 
-local function for_each_object_with_behavior(behavior, func) --* function by Isaac
-    local o = obj_get_first_with_behavior_id(behavior)
-    if not o then return end
-    while o do
-        func(o)
-        o = obj_get_next_with_same_behavior_id(o)
-    end
+local math_sqrt = math.sqrt
+local math_floor = math.floor
+local random_u16 = random_u16
+local random_float = random_float
+
+local function samelevelas(im)
+    return gNetworkPlayers[0].currLevelNum == gNetworkPlayers[im].currLevelNum and
+        gNetworkPlayers[0].currAreaIndex == gNetworkPlayers[im].currAreaIndex and
+        gNetworkPlayers[0].currActNum == gNetworkPlayers[im].currActNum
 end
 
 local function chaos_code_obj_all_behaviorscriptc(obj)
@@ -458,47 +465,42 @@ local function chaos_code_obj_all_behaviorscriptc(obj)
         nearest_mario_state_to_object(gCurrentObject).marioObj or nil
     if gMarioObject then
         for im = 0, MAX_PLAYERS - 1 do
-            if gPlayerSyncTable[gMarioStates[im].playerIndex].objfollowall then
+            local mIndex = gMarioStates[im].playerIndex
+            if gPlayerSyncTable[mIndex].objfollowall then
                 --gMarioObject = gMarioStates[im].marioObj
-                if gNetworkPlayers[0].currLevelNum == gNetworkPlayers[gMarioStates[im].playerIndex].currLevelNum and gNetworkPlayers[0].currAreaIndex == gNetworkPlayers[gMarioStates[im].playerIndex].currAreaIndex and gNetworkPlayers[0].currActNum == gNetworkPlayers[gMarioStates[im].playerIndex].currActNum then
+                if samelevelas(mIndex) then
                     if gCurrentObject.behavior ~= get_behavior_from_id(id_bhvActSelectorStarType) then
                         local x = gMarioObject.oPosX - gCurrentObject.oPosX
                         local y = gMarioObject.oPosY - gCurrentObject.oPosY
                         local z = gMarioObject.oPosZ - gCurrentObject.oPosZ
-                        if math.sqrt(x * x + y * y + z * z) > 1.0 then
-                            if gCurrentObject.header.gfx.sharedChild then
-                                local distance = math.sqrt(x * x + y * y + z * z)
-                                local xt = x / distance * 10.0
-                                local yt = y / distance * 10.0
-                                local zt = z / distance * 10.0
-                                gCurrentObject.oPosX = gCurrentObject.oPosX + xt
-                                gCurrentObject.oPosY = gCurrentObject.oPosY + yt
-                                gCurrentObject.oPosZ = gCurrentObject.oPosZ + zt
-                            end
+                        if math_sqrt(x * x + y * y + z * z) > 1.0 then
+                            local distance = math_sqrt(x * x + y * y + z * z)
+                            local xt = x / distance * 10.0
+                            local yt = y / distance * 10.0
+                            local zt = z / distance * 10.0
+                            gCurrentObject.oPosX = gCurrentObject.oPosX + xt
+                            gCurrentObject.oPosY = gCurrentObject.oPosY + yt
+                            gCurrentObject.oPosZ = gCurrentObject.oPosZ + zt
                         end
                     end
                 end
             end
-        end
 
-
-        for im = 0, MAX_PLAYERS - 1 do
-            if gPlayerSyncTable[gMarioStates[im].playerIndex].objrandomangle then
+            if gPlayerSyncTable[mIndex].objrandomangle then
                 --gMarioObject = gMarioStates[im].marioObj
-                if gNetworkPlayers[0].currLevelNum == gNetworkPlayers[gMarioStates[im].playerIndex].currLevelNum and gNetworkPlayers[0].currAreaIndex == gNetworkPlayers[gMarioStates[im].playerIndex].currAreaIndex and gNetworkPlayers[0].currActNum == gNetworkPlayers[gMarioStates[im].playerIndex].currActNum then
+                if samelevelas(mIndex) then
                     gCurrentObject.oFaceAnglePitch = gCurrentObject.oFaceAnglePitch +
-                    math.floor(gCurrentObject.oPosX / 10.0)
-                    gCurrentObject.oFaceAngleYaw = gCurrentObject.oFaceAngleYaw + math.floor(gCurrentObject.oPosX / 10.0)
-                    gCurrentObject.oMoveAngleYaw = gCurrentObject.oMoveAngleYaw + math.floor(gCurrentObject.oPosX / 10.0)
+                        math_floor(gCurrentObject.oPosX / 10.0)
+                    gCurrentObject.oFaceAngleYaw = gCurrentObject.oFaceAngleYaw + math_floor(gCurrentObject.oPosX / 10.0)
+                    gCurrentObject.oMoveAngleYaw = gCurrentObject.oMoveAngleYaw + math_floor(gCurrentObject.oPosX / 10.0)
                     gCurrentObject.oFaceAngleRoll = gCurrentObject.oFaceAngleRoll +
-                    math.floor(gCurrentObject.oPosX / 10.0)
+                        math_floor(gCurrentObject.oPosX / 10.0)
                 end
             end
-        end
-        for im = 0, MAX_PLAYERS - 1 do
-            if gPlayerSyncTable[gMarioStates[im].playerIndex].objrandomscale then
+
+            if gPlayerSyncTable[mIndex].objrandomscale then
                 --gMarioObject = gMarioStates[im].marioObj
-                if gNetworkPlayers[0].currLevelNum == gNetworkPlayers[gMarioStates[im].playerIndex].currLevelNum and gNetworkPlayers[0].currAreaIndex == gNetworkPlayers[gMarioStates[im].playerIndex].currAreaIndex and gNetworkPlayers[0].currActNum == gNetworkPlayers[gMarioStates[im].playerIndex].currActNum then
+                if samelevelas(mIndex) then
                     if (random_u16() & 0x1f) == 0 then
                         gCurrentObject.header.gfx.scale.x = gCurrentObject.header.gfx.scale.x * (random_float() * 2)
                         gCurrentObject.header.gfx.scale.y = gCurrentObject.header.gfx.scale.y * (random_float() * 2)
@@ -513,6 +515,8 @@ local function chaos_code_obj_all_behaviorscriptc(obj)
     end
 end
 
+local sins = sins
+
 gGlobalSyncTable.dumbTimer = 0;
 local function chaos_code_obj_all_surface_loadc(obj)
     local gCurrentObject = obj
@@ -523,9 +527,10 @@ local function chaos_code_obj_all_surface_loadc(obj)
         end
 
         for im = 0, MAX_PLAYERS - 1 do
-            if gPlayerSyncTable[gMarioStates[im].playerIndex].objrandomyaw then
+            local msindex = gMarioStates[im].playerIndex
+            if gPlayerSyncTable[msindex].objrandomyaw then
                 --gMarioObject = gMarioStates[im].marioObj
-                if gNetworkPlayers[0].currLevelNum == gNetworkPlayers[gMarioStates[im].playerIndex].currLevelNum and gNetworkPlayers[0].currAreaIndex == gNetworkPlayers[gMarioStates[im].playerIndex].currAreaIndex and gNetworkPlayers[0].currActNum == gNetworkPlayers[gMarioStates[im].playerIndex].currActNum then
+                if samelevelas(msindex) then
                     gCurrentObject.oFaceAngleYaw = gCurrentObject.oFaceAngleYaw + 0x30;
                     gCurrentObject.oMoveAngleYaw = gCurrentObject.oFaceAngleYaw + 0x30;
                 end
@@ -533,6 +538,9 @@ local function chaos_code_obj_all_surface_loadc(obj)
         end
     end
 end
+local save_file_get_star_flags = save_file_get_star_flags
+local get_current_save_file_num = get_current_save_file_num
+local obj_set_model_extended = obj_set_model_extended
 local starspawnedloop = function(g)
     if (codeActive(16)) then
         local currentLevelStarFlags = save_file_get_star_flags(get_current_save_file_num() - 1,
@@ -1006,11 +1014,33 @@ local settextotoad = {
 
 
 }
+local math_randomseed = math.randomseed
+local math_random = math.random
+local cur_obj_nearest_object_with_behavior = cur_obj_nearest_object_with_behavior
+local texture_override_set = texture_override_set
+local texture_override_reset = texture_override_reset
+local coss = coss
+local sequence_player_set_tempo = sequence_player_set_tempo
+local camera_freeze = camera_freeze
+local camera_unfreeze = camera_unfreeze
+local is_game_paused = is_game_paused
+local execute_mario_action = execute_mario_action
+local network_player_reset_override_palette = network_player_reset_override_palette
+local network_player_set_override_palette_color = network_player_set_override_palette_color
+local vec3f_set = vec3f_set
+local djui_hud_get_screen_width= djui_hud_get_screen_width
+local djui_hud_measure_text = djui_hud_measure_text
+local djui_hud_print_text = djui_hud_print_text
+local djui_hud_set_font = djui_hud_set_font
+local djui_hud_set_resolution = djui_hud_set_resolution
+local network_local_index_from_global = network_local_index_from_global
+local obj_has_model_extended = obj_has_model_extended
+local hud_set_value = hud_set_value
 ---@param m MarioState
 local function chaos_processing(m)
     -- local i
     if m.playerIndex == 0 then
-        math.randomseed(math.random(math.random(3274762, 92382737472)), math.random(80002, 9000004027))
+        math_randomseed(math_random(math_random(3274762, 92382737472)), math_random(80002, 9000004027))
         local j = 999
         local object
         local gCurrLvlNum
@@ -1055,7 +1085,7 @@ local function chaos_processing(m)
                         end
                     end
                 end
-                if not DEBUGTHECODE then codeSelected[i] = j end      -- turn on code number j
+                if not DEBUGTHECODE then --[[djui_chat_message_create("from " .. codeSelected[i])]] codeSelected[i] = j --[[djui_chat_message_create("to " .. codeSelected[i])]] end      -- turn on code number j
                 if not DEBUGTHECODE then codeTimers[i] = timer[j] end -- predetermined timers for some codes
                 if (codeTimers[i] == 0) then
                     codeTimers[i] = 1800
@@ -1156,7 +1186,7 @@ local function chaos_processing(m)
                     if m.floor.force ~= 0x7777 then
                         if m.floor.type ~= 0x0a then
                             if m.floor.type < 0x7f then
-                                m.floor.type = validTypes[math.random(0, #validTypes)]
+                                m.floor.type = validTypes[math_random(0, #validTypes)]
                                 m.floor.force = 0x7777
                             end
                         end
@@ -1190,13 +1220,13 @@ local function chaos_processing(m)
             end
 
             if codeActive(30) then
-                m.pos.x = m.pos.x - math.sin(m.faceAngle.y) * 8
-                m.pos.z = m.pos.z - math.cos(m.faceAngle.y) * 8
+                m.pos.x = m.pos.x - sins(m.faceAngle.y) * 8
+                m.pos.z = m.pos.z - coss(m.faceAngle.y) * 8
             end
 
             if codeActive(67) then
-                m.pos.x = m.pos.x + math.sin(m.faceAngle.y) * 10
-                m.pos.z = m.pos.z + math.cos(m.faceAngle.y) * 10
+                m.pos.x = m.pos.x + sins(m.faceAngle.y) * 10
+                m.pos.z = m.pos.z + coss(m.faceAngle.y) * 10
             end
 
             if codeActive(33) then
@@ -1484,15 +1514,15 @@ local function chaos_processing(m)
                             m.pos.z, nil);
                         obj_translate_xz_random(coin, 0);
                         coin.oCoinUnk110 = 20.0;
-                        hud_set_value(HUD_DISPLAY_COINS, hud_get_value(HUD_DISPLAY_COINS) - 1);
+                        hud_set_value(HUD_DISPLAY_COINS, m.numCoins);
                     end
                 end
             end
 
             if (codeActive(98)) then
-                if ((get_global_timer() & 0x7) == 0) then
-                    --m.marioObj.header.gfx.scale.y = 1.0 + (1.0 / 56.0) * random_u16() % 3
-                end
+                --if ((get_global_timer() & 0x7) == 0) then
+                --m.marioObj.header.gfx.scale.y = 1.0 + (1.0 / 56.0) * random_u16() % 3
+                -- end
             end
 
             if (codeActive(90)) then
