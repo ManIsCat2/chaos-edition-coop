@@ -1,4 +1,4 @@
--- name: SM64 Chaos Edition
+-- name: Chaos Edition
 -- pausable: false
 
 local CODETEST = 0
@@ -1028,7 +1028,7 @@ local execute_mario_action = execute_mario_action
 local network_player_reset_override_palette = network_player_reset_override_palette
 local network_player_set_override_palette_color = network_player_set_override_palette_color
 local vec3f_set = vec3f_set
-local djui_hud_get_screen_width= djui_hud_get_screen_width
+local djui_hud_get_screen_width = djui_hud_get_screen_width
 local djui_hud_measure_text = djui_hud_measure_text
 local djui_hud_print_text = djui_hud_print_text
 local djui_hud_set_font = djui_hud_set_font
@@ -1036,6 +1036,7 @@ local djui_hud_set_resolution = djui_hud_set_resolution
 local network_local_index_from_global = network_local_index_from_global
 local obj_has_model_extended = obj_has_model_extended
 local hud_set_value = hud_set_value
+local approach_s32 = approach_s32
 ---@param m MarioState
 local function chaos_processing(m)
     -- local i
@@ -1075,6 +1076,8 @@ local function chaos_processing(m)
                     --j = 123
                 end
 
+                local i = 0
+
                 i = random_u16() % gGlobalSyncTable.MAXCODES -- select an index for the code to exist in
                 -- make some codes less likely in some stages
                 if (gCurrLvlNum == LEVEL_BITDW or gCurrLvlNum == LEVEL_BITFS
@@ -1085,7 +1088,10 @@ local function chaos_processing(m)
                         end
                     end
                 end
-                if not DEBUGTHECODE then --[[djui_chat_message_create("from " .. codeSelected[i])]] codeSelected[i] = j --[[djui_chat_message_create("to " .. codeSelected[i])]] end      -- turn on code number j
+                if not DEBUGTHECODE then --[[djui_chat_message_create("from " .. codeSelected[i])]]
+                    codeSelected[i] =
+                        j --[[djui_chat_message_create("to " .. codeSelected[i])]]
+                end                                                   -- turn on code number j
                 if not DEBUGTHECODE then codeTimers[i] = timer[j] end -- predetermined timers for some codes
                 if (codeTimers[i] == 0) then
                     codeTimers[i] = 1800
@@ -1717,43 +1723,17 @@ local function debg_cmd2(d)
     codeSelected[1] = tonumber(d)
 end
 
-local function setchaoticness_cmd(r)
-    local val = tonumber(r)
-    if val then
-        if val > 150 then
-            djui_chat_message_create("Number is bigger than 150!")
-            return true
-        end
 
-        if val < 1 then
-            djui_chat_message_create("Number is smaller than 0!")
-            return true
-        end
-
-
-        gGlobalSyncTable.MAXCODES = val
-        djui_chat_message_create("Chaoticness set to " .. tostring(val) .. "!")
-        return true
-    end
-    djui_chat_message_create("No input number!")
-    return true
+local function setchaoticness_cmd(ind, val)
+    gGlobalSyncTable.MAXCODES = val
+    --djui_chat_message_create("set" .. val)
+    update_mod_menu_element_name(ind, "Chaoticness: " .. val)
 end
 
-local function setchaostimer_cmd(r)
-    local val = tonumber(r)
-    if val then
-        if val < 1 then
-            djui_chat_message_create("Number is smaller than 1!")
-            return true
-        end
-    end
-    if val then
-        gGlobalSyncTable.CODELENGTH = val
-        djui_chat_message_create("Chaos Timer set to " .. tostring(val) .. "!")
-        return true
-    end
-    djui_chat_message_create("No input number!")
-    return true
+local function setchaostimer_cmd(ind, val)
+    gGlobalSyncTable.CODELENGTH = val * 30
+    --djui_chat_message_create("set" .. val * 30)
+    update_mod_menu_element_name(ind, "Chaos Timer: " .. val .. " (seconds)")
 end
 
 hook_event(HOOK_OBJECT_SET_MODEL, function(o)
@@ -1816,14 +1796,16 @@ if not DEBUGTHECODE then
     if network_is_server() then
         hook_chat_command("d", "Debug", debg_cmd)
         hook_chat_command("ad", "aDebug", debg_cmd2)
-        hook_chat_command("chaotic", "Sets the chaoticness of the mod (Default = 20)", setchaoticness_cmd)
-        hook_chat_command("chtimer", "Sets the Chaos timer (Default = 120)", setchaostimer_cmd)
+        hook_mod_menu_slider("Chaoticness: " .. gGlobalSyncTable.MAXCODES, 8, 1, 150, setchaoticness_cmd)
+        hook_mod_menu_slider("Chaos Timer: " .. math_floor(gGlobalSyncTable.CODELENGTH / 30) .. " (seconds)", 4, 0, 30,
+            setchaostimer_cmd)
     end
 else
     hook_chat_command("d", "Debug", debg_cmd)
     hook_chat_command("ad", "aDebug", debg_cmd2)
-    hook_chat_command("chaotic", "Sets the chaoticness of the mod (Default = 20)", setchaoticness_cmd)
-    hook_chat_command("chtimer", "Sets the Chaos timer (Default = 120)", setchaostimer_cmd)
+    hook_mod_menu_slider("Chaoticness: " .. gGlobalSyncTable.MAXCODES, 8, 1, 150, setchaoticness_cmd)
+    hook_mod_menu_slider("Chaos Timer: " .. math_floor(gGlobalSyncTable.CODELENGTH / 30) .. " (seconds)", 4, 0, 30,
+        setchaostimer_cmd)
 end
 
 hook_behavior(id_bhvBobomb, get_object_list_from_behavior(get_behavior_from_id(id_bhvBobomb)), false, nil,
@@ -1855,11 +1837,11 @@ hook_behavior(id_bhvGoomba, get_object_list_from_behavior(get_behavior_from_id(i
     end
 end, nil)
 
-function allStars(g)
+local function allStars(g)
     starspawnedloop(g)
 end
 
-function allstarsloop(g)
+local function allstarsloop(g)
     if (codeActive(25)) then
         bhv_koopa_update();
         obj_set_model_extended(g, E_MODEL_STAR)
