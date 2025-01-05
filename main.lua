@@ -1,4 +1,5 @@
 -- name: Chaos Edition
+-- description: Super Mario 64, but random codes are injected into the game at random intervals, resulting in an experience that can only be described as chaotic.\n\nOriginal Mod Author: Kaze Emanuar\nMod Author: ManIsCat2\n\nNot all the codes could be ported for coop so some are missing.\nI am very sorry!
 -- pausable: false
 
 local CODETEST = 0
@@ -1103,11 +1104,9 @@ local function chaos_processing(m)
                         codeClear(5)
                     end
                 elseif j == 7 then
-                    -- todo (toadface)
-                    if (gNetworkPlayers[0].currCourseNum == COURSE_WF or gNetworkPlayers[0].currCourseNum == COURSE_BOB or gNetworkPlayers[0].currCourseNum == COURSE_THI or gNetworkPlayers[0].currCourseNum == COURSE_TTM) then
-                        for texi = 1, #settextotoad do
-                            texture_override_set(settextotoad[texi], toadface)
-                        end
+                    -- (toadface)
+                    for texi = 1, #settextotoad do
+                        texture_override_set(settextotoad[texi], toadface)
                     end
                 elseif j == 12 then
                     gLakituState.keyDanceRoll = random_u16() & 0x3fff - 0x2000
