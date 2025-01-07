@@ -1074,7 +1074,7 @@ local function chaos_processing(m)
                 newCodeTimer = 0
                 if not DEBUGTHECODE then
                     j = random_u16() % CODECOUNT -- select a code
-                    --j = 123
+                    --j = 55
                 end
 
                 local i = 0
@@ -1482,7 +1482,8 @@ local function chaos_processing(m)
             --mario.c
 
             if (codeActive(55)) then
-                m.marioObj.header.gfx.animInfo.animAccel = 0
+                m.marioObj.header.gfx.animInfo.animFrame = 0
+                m.marioObj.header.gfx.animInfo.prevAnimFrame = 0
             end
 
             if (codeActive(46)) then
@@ -1612,6 +1613,12 @@ local function chaos_processing(m)
             if (codeActive(147)) then
                 for_each_obj(function(g)
                     g.oForwardVel = g.oForwardVel * 2
+                end);
+            end
+
+            if (codeActive(113)) then
+                for_each_obj(function(g)
+                    g.header.gfx.animInfo.animFrame = 0
                 end);
             end
 
