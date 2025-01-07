@@ -1,4 +1,4 @@
--- name: Chaos Edition
+-- name: [WIP] Chaos Edition
 -- description: Super Mario 64, but random codes are injected into the game at random intervals, resulting in an experience that can only be described as chaotic.\n\nOriginal Mod Author: Kaze Emanuar\nMod Author: ManIsCat2\n\nNot all the codes could be ported for coop so some are missing.\nI am very sorry!
 -- pausable: false
 
@@ -1517,8 +1517,10 @@ local function chaos_processing(m)
                         local coin = spawn_sync_object(id_bhvSingleCoinGetsSpawned, E_MODEL_YELLOW_COIN, m.pos.x, m.pos
                             .y,
                             m.pos.z, nil);
-                        obj_translate_xz_random(coin, 0);
-                        coin.oCoinUnk110 = 20.0;
+                        if (coin) then
+                            obj_translate_xz_random(coin, 0);
+                            coin.oCoinUnk110 = 20.0;
+                        end
                         hud_set_value(HUD_DISPLAY_COINS, m.numCoins);
                     end
                 end
