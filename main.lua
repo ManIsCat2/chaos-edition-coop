@@ -1,4 +1,4 @@
--- name: [WIP] Chaos Edition
+-- name: Chaos Edition
 -- description: Super Mario 64, but random codes are injected into the game at random intervals, resulting in an experience that can only be described as chaotic.\n\nOriginal Mod Author: Kaze Emanuar\nMod Author: ManIsCat2\n\nNot all the codes could be ported for coop so some are missing.\nI am very sorry!
 -- pausable: false
 
@@ -1744,15 +1744,6 @@ local function setchaostimer_cmd(ind, val)
     update_mod_menu_element_name(ind, "Chaos Timer: " .. val .. " (seconds)")
 end
 
-hook_event(HOOK_OBJECT_SET_MODEL, function(o)
-    if obj_has_behavior_id(o, id_bhvMario) ~= 0 then
-        local i = network_local_index_from_global(o.globalPlayerIndex)
-        if gPlayerSyncTable[i].modelId ~= nil and obj_has_model_extended(o, gPlayerSyncTable[i].modelId) == 0 then
-            obj_set_model_extended(o, gPlayerSyncTable[i].modelId)
-        end
-    end
-end)
-
 hook_event(HOOK_MARIO_UPDATE, chaos_processing)
 hook_event(HOOK_UPDATE, chaos_processing_slower)
 hook_event(HOOK_ON_HUD_RENDER_BEHIND, chaos_processing_hud)
@@ -1802,15 +1793,15 @@ hook_event(HOOK_ON_INTERACT, function(m, o, t, s)
 end)
 if not DEBUGTHECODE then
     if network_is_server() then
-        hook_chat_command("d", "Debug", debg_cmd)
-        hook_chat_command("ad", "aDebug", debg_cmd2)
+        --hook_chat_command("d", "Debug", debg_cmd)
+       -- hook_chat_command("ad", "aDebug", debg_cmd2)
         hook_mod_menu_slider("Chaoticness: " .. gGlobalSyncTable.MAXCODES, 8, 1, 150, setchaoticness_cmd)
         hook_mod_menu_slider("Chaos Timer: " .. math_floor(gGlobalSyncTable.CODELENGTH / 30) .. " (seconds)", 4, 0, 30,
             setchaostimer_cmd)
     end
 else
-    hook_chat_command("d", "Debug", debg_cmd)
-    hook_chat_command("ad", "aDebug", debg_cmd2)
+    --hook_chat_command("d", "Debug", debg_cmd)
+    --hook_chat_command("ad", "aDebug", debg_cmd2)
     hook_mod_menu_slider("Chaoticness: " .. gGlobalSyncTable.MAXCODES, 8, 1, 150, setchaoticness_cmd)
     hook_mod_menu_slider("Chaos Timer: " .. math_floor(gGlobalSyncTable.CODELENGTH / 30) .. " (seconds)", 4, 0, 30,
         setchaostimer_cmd)
