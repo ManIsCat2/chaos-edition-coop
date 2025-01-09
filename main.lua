@@ -1794,7 +1794,7 @@ end)
 if not DEBUGTHECODE then
     if network_is_server() then
         --hook_chat_command("d", "Debug", debg_cmd)
-       -- hook_chat_command("ad", "aDebug", debg_cmd2)
+        -- hook_chat_command("ad", "aDebug", debg_cmd2)
         hook_mod_menu_slider("Chaoticness: " .. gGlobalSyncTable.MAXCODES, 8, 1, 150, setchaoticness_cmd)
         hook_mod_menu_slider("Chaos Timer: " .. math_floor(gGlobalSyncTable.CODELENGTH / 30) .. " (seconds)", 4, 0, 30,
             setchaostimer_cmd)
@@ -1809,8 +1809,10 @@ end
 
 hook_behavior(id_bhvBobomb, get_object_list_from_behavior(get_behavior_from_id(id_bhvBobomb)), false, nil,
     function(g)
-        if g.oHeldState == HELD_HELD then
-            g.oBobombFuseTimer = 153;
+        if (codeActive(1)) then
+            if g.oHeldState == HELD_HELD then
+                g.oBobombFuseTimer = 153;
+            end
         end
     end)
 
