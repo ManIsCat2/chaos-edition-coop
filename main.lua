@@ -441,7 +441,9 @@ local function for_each_obj(func)
         local objF = obj_get_first(i)
 
         while objF do
-            if objF.behavior ~= get_behavior_from_id(id_bhvStaticObject) then
+            if objF.behavior ~= get_behavior_from_id(id_bhvStaticObject) and
+                objF.behavior ~= get_behavior_from_id(id_RM_Scroll_Texture) and
+                objF.behavior ~= get_behavior_from_id(id_editor_Scroll_Texture) then
                 func(objF)
             end
             objF = obj_get_next(objF)
