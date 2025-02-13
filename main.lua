@@ -5,7 +5,7 @@
 local CODETEST = 0
 gGlobalSyncTable.MAXCODES = 8
 local CODECOUNT = 150
-local DEBUGTHECODE = false
+local DEBUGTHECODE = true
 local codeSelected = {
     [0] = CODETEST,
     CODETEST,
@@ -1333,52 +1333,7 @@ local function chaos_processing(m)
             end
 
             --game_init.c
-
-            --[[if (codeActive(45)) then
-            if (m.controller.stickX < -60) then
-                m.controller.stickX = -80;
-            elseif (m.controller.stickX < -20) then
-                m.controller.stickX = -40;
-            elseif (m.controller.stickX < 20) then
-                m.controller.stickX = 0;
-            elseif (m.controller.stickX < 60) then
-                m.controller.stickX = 40;
-            else
-                m.controller.stickX = 80;
-            end
-
-
-            if (m.controller.stickY < -60) then
-                m.controller.stickY = -80;
-            elseif (m.controller.stickY < -20) then
-                m.controller.stickY = -40;
-            elseif (m.controller.stickY < 20) then
-                m.controller.stickY = 0;
-            elseif (m.controller.stickY < 60) then
-                m.controller.stickY = 40;
-            else
-                m.controller.stickY = 80;
-            end
-        end]]
-
-            if (codeActive(61)) then
-                if (m.numCoins & 1) == 0 then
-                    m.controller.rawStickX = m.controller.rawStickX * -1;
-                    m.controller.rawStickY = m.controller.rawStickY * -1;
-                end
-            end
-
-            if (codeActive(50)) then
-                m.controller.buttonPressed = m.controller.buttonPressed | START_BUTTON;
-            end
-
-            if (codeActive(51)) then
-                camTimer = camTimer + 1
-                if (camTimer > 15) then
-                    camTimer = 0;
-                    m.controller.buttonPressed = m.controller.buttonPressed | (random_u16() & (C_BUTTONS | R_TRIG));
-                end
-            end
+            --at hook before
 
             --ingame menu.c not possible
 
@@ -1655,6 +1610,62 @@ local function chaos_processing(m)
     end
 end
 
+local function chaos_proccesing_before(m)
+    if m.playerIndex == 0 then
+        if (codeActive(45)) then
+            if (m.controller.stickX < -60) then
+                m.controller.stickX = -80;
+            elseif (m.controller.stickX < -20) then
+                m.controller.stickX = -40;
+            elseif (m.controller.stickX < 20) then
+                m.controller.stickX = 0;
+            elseif (m.controller.stickX < 60) then
+                m.controller.stickX = 40;
+            else
+                m.controller.stickX = 80;
+            end
+
+
+            if (m.controller.stickY < -60) then
+                m.controller.stickY = -80;
+            elseif (m.controller.stickY < -20) then
+                m.controller.stickY = -40;
+            elseif (m.controller.stickY < 20) then
+                m.controller.stickY = 0;
+            elseif (m.controller.stickY < 60) then
+                m.controller.stickY = 40;
+            else
+                m.controller.stickY = 80;
+            end
+        end
+
+        if (codeActive(61)) then
+            if (m.numCoins & 1) ~= 0 then
+                m.controller.rawStickX = m.controller.rawStickX * -1;
+                m.controller.rawStickY = m.controller.rawStickY * -1;
+            end
+        end
+
+        if (codeActive(50)) then
+            m.controller.buttonPressed = m.controller.buttonPressed | START_BUTTON;
+        end
+
+        if (codeActive(51)) then
+            camTimer = camTimer + 1
+            if (camTimer > 15) then
+                camTimer = 0;
+                m.controller.buttonPressed = m.controller.buttonPressed | (random_u16() & (C_BUTTONS | R_TRIG));
+            end
+        end
+
+        if (codeActive(4)) then
+            m.controller.buttonPressed =
+                (m.controller.buttonPressed & 0x3FFF)
+                | ((m.controller.buttonPressed & 0x4000) << 1)
+                | ((m.controller.buttonPressed & 0x8000) >> 1);
+        end
+    end
+end
 local function chaos_processing_slower()
     --behavior_script.c
     for_each_obj(chaos_code_obj_all_behaviorscriptc)
@@ -1746,6 +1757,7 @@ local function setchaostimer_cmd(ind, val)
     update_mod_menu_element_name(ind, "Chaos Timer: " .. val .. " (seconds)")
 end
 
+hook_event(HOOK_BEFORE_MARIO_UPDATE, chaos_proccesing_before)
 hook_event(HOOK_MARIO_UPDATE, chaos_processing)
 hook_event(HOOK_UPDATE, chaos_processing_slower)
 hook_event(HOOK_ON_HUD_RENDER_BEHIND, chaos_processing_hud)
@@ -1802,8 +1814,8 @@ if not DEBUGTHECODE then
             setchaostimer_cmd)
     end
 else
-    --hook_chat_command("d", "Debug", debg_cmd)
-    --hook_chat_command("ad", "aDebug", debg_cmd2)
+    hook_chat_command("d", "Debug", debg_cmd)
+    hook_chat_command("ad", "aDebug", debg_cmd2)
     hook_mod_menu_slider("Chaoticness: " .. gGlobalSyncTable.MAXCODES, 8, 1, 150, setchaoticness_cmd)
     hook_mod_menu_slider("Chaos Timer: " .. math_floor(gGlobalSyncTable.CODELENGTH / 30) .. " (seconds)", 4, 0, 30,
         setchaostimer_cmd)
