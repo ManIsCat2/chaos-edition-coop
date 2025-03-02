@@ -5,7 +5,7 @@
 local CODETEST = 0
 gGlobalSyncTable.MAXCODES = 8
 local CODECOUNT = 150
-local DEBUGTHECODE = true
+local DEBUGTHECODE = false
 local codeSelected = {
     [0] = CODETEST,
     CODETEST,
@@ -1458,9 +1458,6 @@ local function chaos_processing(m)
                 m.controller.buttonPressed = m.controller.buttonPressed | Z_TRIG;
             end
 
-            if codeActive(72) then
-                -- m.controller.stickY = random_u16()
-            end
             if (codeActive(126)) then
                 m.waterLevel = m.pos.y + 200;
             end
@@ -1663,6 +1660,10 @@ local function chaos_proccesing_before(m)
                 (m.controller.buttonPressed & 0x3FFF)
                 | ((m.controller.buttonPressed & 0x4000) << 1)
                 | ((m.controller.buttonPressed & 0x8000) >> 1);
+        end
+
+        if codeActive(72) then
+            m.controller.stickY = random_u16()
         end
     end
 end
