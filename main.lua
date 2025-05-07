@@ -436,6 +436,18 @@ local obj_get_next = obj_get_next
 local obj_get_first = obj_get_first
 local nearest_mario_state_to_object = nearest_mario_state_to_object
 
+local function traverse_geolayout(first, f)
+    local g = first
+
+    repeat
+        f(g)
+        if g.children then
+            traverse_geolayout(g.children, f)
+        end
+        g = g.next
+    until g == first
+end
+
 local function for_each_obj(func)
     for i = OBJ_LIST_EXT, NUM_OBJ_LISTS - 1 do
         local objF = obj_get_first(i)
@@ -1056,6 +1068,7 @@ local function chaos_processing(m)
         --  int sizecurrent = 0
         local inActSelect = cur_obj_nearest_object_with_behavior(get_behavior_from_id(id_bhvActSelector))
         if (gCurrLvlNum ~= 1) then
+            m.marioObj.hookRender = 90
             --[[ if (!gMarioState.marioObj) then
         gMarioState.marioObj = 0x803ffC00 -- if no mario exists, use a spoof address. saves us
                                             -- checking for null pointers
@@ -1325,7 +1338,7 @@ local function chaos_processing(m)
             end
 
             if (codeActive(82)) then
-                if (gCamera.cutscene == 0) then
+                if (m.area.camera.cutscene == 0) then
                     camera_freeze()
                 end
             else
@@ -1350,7 +1363,6 @@ local function chaos_processing(m)
             end
 
             --level_update.c
-
             if (codeActive(118)) then
                 if (random_u16() < 0x9000) then
                     hud_set_value(HUD_DISPLAY_TIMER, hud_get_value(HUD_DISPLAY_TIMER) + 1)
@@ -1667,6 +1679,29 @@ local function chaos_proccesing_before(m)
         end
     end
 end
+
+local screentimer = 0
+
+---@param o Object
+local function chaos_proccess_obj_render(o)
+    if o.hookRender == 90 then
+        if (codeActive(54)) then
+            traverse_geolayout(o.header.gfx.node.parent.parent.parent, function(g)
+                if g.type == GRAPH_NODE_TYPE_DISPLAY_LIST then
+                    local dl = cast_graph_node(g).displayList
+                    if dl then
+                        gfx_set_command(dl, "gsSPClearGeometryMode(G_LIGHTING)")
+                    end
+                end
+            end)
+        elseif (codeActive(101)) then
+            local camnode = cast_graph_node(o.header.gfx.node.parent.parent.parent)
+            camnode.matrixPtr.m00 = camnode.matrixPtr.m00 + sins(screentimer) * 0.001
+            screentimer = screentimer + 200
+        end
+    end
+end
+
 local function chaos_processing_slower()
     --behavior_script.c
     for_each_obj(chaos_code_obj_all_behaviorscriptc)
@@ -1674,6 +1709,7 @@ local function chaos_processing_slower()
 
     for_each_obj(chaos_code_obj_all_surface_loadc)
 end
+
 local validLevels = { [0] = 4, 5, 6, 7, 8, 12, 10, 11, 12, 13, 14, 15, 13, 17, 18, 19, 20, 21, 22, 23, 24, 15, 27, 28, 29, 30, 31, 33, 34, 36, 9, 6 };
 
 local function chaos_process_random_tp()
@@ -1760,6 +1796,7 @@ end
 
 hook_event(HOOK_BEFORE_MARIO_UPDATE, chaos_proccesing_before)
 hook_event(HOOK_MARIO_UPDATE, chaos_processing)
+hook_event(HOOK_ON_OBJECT_RENDER, chaos_proccess_obj_render)
 hook_event(HOOK_UPDATE, chaos_processing_slower)
 hook_event(HOOK_ON_HUD_RENDER_BEHIND, chaos_processing_hud)
 hook_event(HOOK_ON_HUD_RENDER, debug_codes)
