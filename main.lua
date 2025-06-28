@@ -2,6 +2,10 @@
 -- description: Super Mario 64, but random codes are injected into the game at random intervals, resulting in an experience that can only be described as chaotic.\n\nOriginal Mod Author: Kaze Emanuar\nMod Author: ManIsCat2\n\nNot all the codes could be ported for coop so some are missing.\nI am very sorry!
 -- pausable: false
 
+local gCurrDL
+local function C0(pos, width) return ((gCurrDL.w0 >> (pos)) & ((1 << width) - 1)) end
+local function C1(pos, width) return ((gCurrDL.w1 >> (pos)) & ((1 << width) - 1)) end
+
 local CODETEST = 0
 gGlobalSyncTable.MAXCODES = 8
 local CODECOUNT = 150
@@ -1681,19 +1685,50 @@ local function chaos_proccesing_before(m)
 end
 
 local screentimer = 0
+local allVertex = {}
+local countVertex = 1
 
 ---@param o Object
 local function chaos_proccess_obj_render(o)
     if o.hookRender == 90 then
         if (codeActive(54)) then
             traverse_geolayout(o.header.gfx.node.parent.parent.parent, function(g)
-                if g.type == GRAPH_NODE_TYPE_DISPLAY_LIST then
+                local node = g
+                if node.type == GRAPH_NODE_TYPE_ANIMATED_PART or node.type == GRAPH_NODE_TYPE_DISPLAY_LIST or node.type == GRAPH_NODE_TYPE_TRANSLATION_ROTATION or node.type == GRAPH_NODE_TYPE_TRANSLATION or node.type == GRAPH_NODE_TYPE_ROTATION or node.type == GRAPH_NODE_TYPE_BILLBOARD or node.type == GRAPH_NODE_TYPE_SCALE then
                     local dl = cast_graph_node(g).displayList
                     if dl then
                         gfx_set_command(dl, "gsSPClearGeometryMode(G_LIGHTING)")
                     end
                 end
             end)
+        elseif (codeActive(114)) then
+            traverse_geolayout(o.header.gfx.node.parent.parent.parent, function(g)
+                local node = g
+                if node.type == GRAPH_NODE_TYPE_ANIMATED_PART or node.type == GRAPH_NODE_TYPE_DISPLAY_LIST or node.type == GRAPH_NODE_TYPE_TRANSLATION_ROTATION or node.type == GRAPH_NODE_TYPE_TRANSLATION or node.type == GRAPH_NODE_TYPE_ROTATION or node.type == GRAPH_NODE_TYPE_BILLBOARD or node.type == GRAPH_NODE_TYPE_SCALE then
+                    local dl = cast_graph_node(g).displayList
+                    if dl then
+                        gfx_parse(dl, function(dlistp, cmd)
+                            gCurrDL = dlistp
+
+                            if cmd == G_VTX then
+                                allVertex[countVertex] = gfx_get_vertex_buffer(dlistp)
+                                countVertex = countVertex + 1
+                            end
+
+                            if cmd == G_SETTIMG then
+                                if #allVertex ~= 0 then
+                                    local id = random_u16() % #allVertex
+                                    if id == 0 then id = 1 end
+                                    gfx_set_command(dlistp,
+                                        "gsDPSetTextureImage(%i, %i, %i, %v)", C0(21, 3), C0(19, 2), C0(0, 10), allVertex
+                                        [id])
+                                end
+                            end
+                        end)
+                    end
+                end
+            end)
+            codeClear(114)
         elseif (codeActive(101)) then
             local camnode = cast_graph_node(o.header.gfx.node.parent.parent.parent)
             camnode.matrixPtr.m00 = camnode.matrixPtr.m00 + sins(screentimer) * 0.001
